@@ -14,19 +14,19 @@ public class ShoppingCart implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private long id;
+    private Long id;
 
     //名称
     private String name;
 
     //用户id
-    private long userId;
+    private Long userId;
 
     //菜品id
-    private long dishId;
+    private Long dishId;
 
     //套餐id
-    private long setmealId;
+    private Long setmealId;
 
     //口味
     private String dishFlavor;

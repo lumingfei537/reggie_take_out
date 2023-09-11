@@ -111,6 +111,7 @@ public class SetmealController {
         List<Setmeal> setmealList = setmealService.list(queryWrapper);
         return Result.success(setmealList);
     }
+
     @PostMapping("/status/{status}")
     public Result<String> status(@PathVariable String status, @RequestParam List<Long> ids) {
         LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();

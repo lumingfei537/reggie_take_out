@@ -6,6 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.7.12</version>
+        <relativePath/>
     </parent>
     <groupId>com.itheima</groupId>
     <artifactId>reggie_take_out</artifactId>

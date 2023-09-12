@@ -168,6 +168,25 @@ public class DishController {
         return Result.success(dishDtoList);
     }
 
+    //@PostMapping("/status/{status}")
+    //public Result<String> status(@PathVariable Integer status, Long ids) {
+    //    log.info("status:{},ids:{}", status, ids);
+    //    Dish dish = dishService.getById(ids);
+    //    if (dish != null) {
+    //        //直接用它传进来的这个status改就行
+    //        dish.setStatus(status);
+    //        dishService.updateById(dish);
+    //        return Result.success("售卖状态修改成功");
+    //    }
+    //    return Result.error("系统繁忙，请稍后再试");
+    //}
+
+    /**
+     * 菜品批量启售/停售
+     * @param status
+     * @param ids
+     * @return
+     */
     @PostMapping("/status/{status}")
     public Result<String> status(@PathVariable Integer status, @RequestParam List<Long> ids) {
         log.info("status:{}, ids:{}", status, ids);
@@ -178,6 +197,11 @@ public class DishController {
         return Result.success("批量操作成功");
     }
 
+    /**
+     * 菜品批量删除
+     * @param ids
+     * @return
+     */
     @DeleteMapping
     public Result<String> delete(@RequestParam List<Long> ids) {
         log.info("删除的ids：{}", ids);

@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.CustomException;
 import com.itheima.reggie.common.Result;
+import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.dto.SetmealDto;
 import com.itheima.reggie.entity.Category;
+import com.itheima.reggie.entity.Dish;
 import com.itheima.reggie.entity.Setmeal;
 import com.itheima.reggie.entity.SetmealDish;
 import com.itheima.reggie.service.CategoryService;
@@ -17,7 +19,15 @@ import com.itheima.reggie.service.SetmealService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -92,6 +102,11 @@ public class SetmealController {
         return Result.success(dtoPage);
     }
 
+    /**
+     * 套餐批量删除
+     * @param ids
+     * @return
+     */
     @DeleteMapping
     public Result<String> deleteByIds(@RequestParam List<Long> ids) {
         log.info("要删除的套餐id为：{}", ids);
@@ -112,6 +127,12 @@ public class SetmealController {
         return Result.success(setmealList);
     }
 
+    /**
+     * 套餐批量启售/停售
+     * @param status
+     * @param ids
+     * @return
+     */
     @PostMapping("/status/{status}")
     public Result<String> status(@PathVariable String status, @RequestParam List<Long> ids) {
         LambdaUpdateWrapper<Setmeal> updateWrapper = new LambdaUpdateWrapper<>();
@@ -122,7 +143,7 @@ public class SetmealController {
     }
 
     /**
-     * 修改时，根据套餐id回显数据
+     * 套餐修改（修改时，根据套餐id回显数据）
      * @param id
      * @return
      */
@@ -133,11 +154,15 @@ public class SetmealController {
             throw new CustomException("套餐信息不存在，请刷新重试");
         }
         SetmealDto setmealDto = new SetmealDto();
+        //拷贝数据
         BeanUtils.copyProperties(setmeal, setmealDto);
         LambdaQueryWrapper<SetmealDish> queryWrapper = new LambdaQueryWrapper<>();
+        //根据setmealId查询具体的setmealDish
         queryWrapper.eq(SetmealDish::getSetmealId, id);
         List<SetmealDish> setmealDishes = setmealDishService.list(queryWrapper);
+        //然后再设置属性
         setmealDto.setSetmealDishes(setmealDishes);
+        //作为结果返回
         return Result.success(setmealDto);
     }
 
@@ -159,5 +184,27 @@ public class SetmealController {
         //更新套餐对应菜品数据
         setmealDishService.saveBatch(setmealDishes);
         return Result.success(setmealDto);
+    }
+    @GetMapping("/dish/{id}")
+    public Result<List<DishDto>> showSetmealDish(@PathVariable Long id) {
+        //条件构造器
+        LambdaQueryWrapper<SetmealDish> dishLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        //手里的数据只有setmealId
+        dishLambdaQueryWrapper.eq(SetmealDish::getSetmealId, id);
+        //查询数据
+        List<SetmealDish> records = setmealDishService.list(dishLambdaQueryWrapper);
+        List<DishDto> dtoList = records.stream().map((item) -> {
+            DishDto dishDto = new DishDto();
+            //copy数据
+            BeanUtils.copyProperties(item,dishDto);
+            //查询对应菜品id
+            Long dishId = item.getDishId();
+            //根据菜品id获取具体菜品数据，这里要自动装配 dishService
+            Dish dish = dishService.getById(dishId);
+            //其实主要数据是要那个图片，不过我们这里多copy一点也没事
+            BeanUtils.copyProperties(dish,dishDto);
+            return dishDto;
+        }).collect(Collectors.toList());
+        return Result.success(dtoList);
     }
 }

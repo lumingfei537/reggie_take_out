@@ -93,7 +93,7 @@ public class AddressBookController {
         //当前用户
         queryWrapper.eq(userId != null, AddressBook::getUserId, userId);
         //默认地址
-        queryWrapper.eq(AddressBook::getIsDeleted, 1);
+        queryWrapper.eq(AddressBook::getIsDefault, 1);
         AddressBook addressBook = addressBookService.getOne(queryWrapper);
         return Result.success(addressBook);
     }

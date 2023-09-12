@@ -40,7 +40,7 @@ public class UserController {
             String code = MailUtils.achieveCode();
             log.info("code={}", code);
             //这里的phone其实就是邮箱，code是我们生成的验证码
-            //MailUtils.sendTestMail(phone, code);
+            MailUtils.sendTestMail(phone, code);
             //验证码存session，方便后面拿出来比对
             session.setAttribute(phone, code);
             return Result.success("验证码发送成功");

@@ -68,7 +68,7 @@ public class DishController {
     }
 
     /**
-     * 分页查找
+     * 菜品信息分页查找
      * @param page
      * @param pageSize
      * @param name
@@ -117,6 +117,12 @@ public class DishController {
         dishDtoPage.setRecords(list);
         return Result.success(dishDtoPage);
     }
+
+    /**
+     * 修改菜品信息的回显功能，填充到修改页面为修改菜品做准备
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public Result<DishDto> getByIdWithFlavor(@PathVariable Long id) {
         DishDto dishDto = dishService.getByIdWithFlavor(id);
@@ -124,26 +130,42 @@ public class DishController {
         return Result.success(dishDto);
     }
 
+    /**
+     * 更新菜品操作
+     * @param dishDto
+     * @return
+     */
     @PutMapping
     public Result<String> update(@RequestBody DishDto dishDto) {
         log.info("接收到的数据为：{}", dishDto);
         dishService.updateWithFlavor(dishDto);
+
+        //清理所有菜品缓存数据
+        //Set keys = redisTemplate.keys("dish_*");
+        //redisTemplate.delete(keys);
+
+        //精确删除，在售状态的
+        String redisKey = "dish_" + dishDto.getCategoryId() + "_" + dishDto.getStatus()+"_1";
+        log.info("准备清理key为:{} 的缓存数据",redisKey);
+        redisTemplate.delete(redisKey);
+
         return Result.success("修改菜品成功");
     }
 
     @GetMapping("/list")
     public Result<List<DishDto>> get(Dish dish) {
         List<DishDto> dishDtoList;
+        //动态构造key
         String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
 
         //先从redis中获取缓存数据
         dishDtoList = (List<DishDto>) redisTemplate.opsForValue().get(key);
 
-        //如果有，则直接返回，无需查询数据库
+        //如果存在，则直接返回，无需查询数据库
         if (dishDtoList != null) {
             return Result.success(dishDtoList);
         }
-        //如果无，则查询数据库，将查询到的菜品数据缓存到Redis
+        //如果不存在，则查询数据库，将查询到的菜品数据缓存到Redis
 
         //条件查询器
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
@@ -185,7 +207,7 @@ public class DishController {
             return dishDto;
             //将所有返回结果收集起来，封装成List
         }).collect(Collectors.toList());
-        //将查询的结果让Redis缓存，设置存活时间为60分钟
+        //如果不存在，需要查询数据库，将查询的结果让Redis缓存，设置存活时间为60分钟
         redisTemplate.opsForValue().set(key, dishDtoList, 60, TimeUnit.MINUTES);
         return Result.success(dishDtoList);
     }

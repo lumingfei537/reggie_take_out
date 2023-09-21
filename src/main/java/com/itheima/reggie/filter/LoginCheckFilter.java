@@ -6,7 +6,11 @@ import com.itheima.reggie.common.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
 
-import javax.servlet.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,6 +23,7 @@ import java.io.IOException;
 @WebFilter(filterName = "loginCheckFilter", urlPatterns = "/*")
 @Slf4j
 public class LoginCheckFilter implements Filter {
+    //调用Spring核心包的字符串匹配类
     //路径匹配器，支持通配符
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
@@ -55,6 +60,7 @@ public class LoginCheckFilter implements Filter {
 
         //4.判断登录状态，如果已登录，则直接放行
         //当初存的session是employee，所以这里就拿它判断
+
         if (request.getSession().getAttribute("employee") != null) {
             log.info("用户已登录，id为{}", request.getSession().getAttribute("employee"));
             //在这里获取一下线程id
@@ -71,6 +77,7 @@ public class LoginCheckFilter implements Filter {
         }
 
         //判断前端用户是否登录
+
         if(request.getSession().getAttribute("user") != null){
             log.info("前端用户已登录，用户id为：{}",request.getSession().getAttribute("user"));
             Long userId = (Long)request.getSession().getAttribute("user");
@@ -78,6 +85,7 @@ public class LoginCheckFilter implements Filter {
             filterChain.doFilter(request,response);
             return;
         }
+
 
         //5.如果未登录则返回未登录结果，通过输出流方式向客户端页面响应数据
         log.info("用户未登录");

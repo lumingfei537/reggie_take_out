@@ -91,7 +91,7 @@ public class LoginCheckFilter implements Filter {
         log.info("用户未登录");
         log.info("用户id {}", request.getSession().getAttribute("employee"));
         response.getWriter().write(JSON.toJSONString(Result.error("NOTLOGIN")));
-
+        return;
     }
 
     /**

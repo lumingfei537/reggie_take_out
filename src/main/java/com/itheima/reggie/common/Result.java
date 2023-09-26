@@ -2,6 +2,7 @@ package com.itheima.reggie.common;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ import java.util.Map;
  * @param <T>
  */
 @Data
-public class Result<T> {//起名R也可以
+public class Result<T> implements Serializable {//起名R也可以
 
     private Integer code;// 编码：1成功。0和其他数字失败
 
